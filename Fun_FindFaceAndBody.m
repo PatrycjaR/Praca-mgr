@@ -3,9 +3,7 @@ function [mask, structure] = Fun_FindFaceAndBody(FRAMES, structure)
 countOfFrames = length(FRAMES);
 
 faceDetector = vision.CascadeObjectDetector('FrontalFaceLBP');
-mouthDetector=vision.CascadeObjectDetector('Mouth','MergeThreshold',16);
-eyeDetector=vision.CascadeObjectDetector('EyePairSmall');
-noseDetector=vision.CascadeObjectDetector('Nose');
+
 mask = [];
 
 % poszukiwanie twarzy na kazdej ramce- region najczestszych znalezionych
@@ -26,15 +24,6 @@ while(i<countOfFrames)
     structure.Face{i}=bboxes;
     structure.FrameWithMarker{i}=insertShape(frame,'Rectangle',bboxes);
 
-    bboxesMouth=step(mouthDetector,frame);
-    structure.FrameWithMarker{i}=insertShape(frame,'Rectangle',bboxesMouth);
-    
-    bboxesEye=step(eyeDetector,frame);
-    structure.FrameWithMarker{i}=insertShape(frame,'Rectangle',bboxesEye);
-    
-    bboxesNose=step(noseDetector,frame);
-    structure.FrameWithMarker{i}=insertShape(frame,'Rectangle',bboxesNose);
-    
     if(isempty(bboxes))
        continue
     end

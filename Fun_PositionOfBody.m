@@ -6,7 +6,6 @@ mask2 = mask > prog;
 
 L = bwlabeln(mask2);
 
-
 gdzieMax = unique(L(mask == max(mask(:))));
 if (length(gdzieMax) > 1)
     error('za duzo regionow');

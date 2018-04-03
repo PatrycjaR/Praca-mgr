@@ -8,6 +8,7 @@ structure.Body=[]; % +
 structure.Markers=[]; % +
 structure.IsFace=[]; %+
 structure.Sum=[];  %+
+structure.SumDec=[]; %+
 structure.Frames=[]; % +
 structure.Mask=[]; % +
 structure.TimeOfRound=[]; % +
@@ -34,25 +35,21 @@ for i = 1 : length(FRAMES)
 end
 disp('skonczylem')
 
-
-
-
 %% poszukiwanie ciala i twarzy
 
-%mask = [];
- [mask, structure]=Fun_FindFaceAndBody(FRAMES, structure);
+[mask, structure]=Fun_FindFaceAndBody(FRAMES, structure);
 % [mask, structure]=Fun_FindBody(FRAMES, structure); %, FrameWithMarker);
-
 structure.Mask=mask;
 
 %% poszukiwanie miejsca, gdzie najczesciej zosta�a znaleziona twarz
 
-sizeOfFrames=size(FRAMES{1,1},1);
 positionOfBody=Fun_PositionOfBody(mask);
 
-% wyciecie tylko poszczegolnych elementow w obrazie
+%% poszukiwanie oczu, ust i nosa
+structure=Fun_FindEyeNoseMouth(FRAMES, structure, positionOfBody);
+
+%%
 % poszukiwanie punktow poruszajacych sie na obrazie
-i=1;
 
 [timeOfRound, howMuchFrame1, structure]=Fun_TurningTimeTogether(FRAMES, positionOfBody, structure);
 

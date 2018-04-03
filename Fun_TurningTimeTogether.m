@@ -4,25 +4,15 @@ profile on
 %i=1;
 tracker = vision.PointTracker;
 points = detectMinEigenFeatures(FRAMES{1}, 'MinQuality', 0.1, 'ROI', positionOfBody);
-
-% BB = regionprops(logical(positionOfBody), 'BoundingBox'); % double(positionOfBody)
-% if (length(BB) ~= 1)
-%     error('za duzo regionow');
-% end
-% BB = BB.BoundingBox;
-
-
 tracker.initialize(points.Location, FRAMES{1}); % -> powtarzac co np. 50 ramek
 %%
 oldpoints = points.Location;
 
-player = vision.VideoPlayer('Position', [0 0 size(FRAMES{1}, 2), size(FRAMES{1}, 1)]);
+% player = vision.VideoPlayer('Position', [0 0 size(FRAMES{1}, 2), size(FRAMES{1}, 1)]);
 
 counter=1;
-
 isStart=false;
 isEnd=false;
-
 endignFirstTurn=0;
 ending=0;
 
@@ -37,13 +27,23 @@ faceDetector = vision.CascadeObjectDetector('UseROI', true); % TUTAJ UZYC ROI
 
 for i = 1: countOfFrames % tutaj zmieniï¿½am 1:countOfFrames
     
-    %     if(i==55)
-    %        disp('aaa');
-    %     end
-    %     if (i==100)
-    %         disp('bbb');
-    %     end
     fprintf(1, '.');
+    
+    % tutaj dodaæ nowego if elseif !!!!
+%     oldpointPrime to dokoñczyæ
+% znaleŸæ najepsze punkty (najbardziej zmieniaj¹ce siê). zrobiæ pochodn¹
+% czyli prêdkoœæ zeby usunaæ prêdkoœæ gigantycznych skoków. 
+% zmiana po³o¿eñ w czasie = prêdkoœæ. 
+    if(rem(i + 1, 50) == 0)
+        Prime = detectMinEigenFeatures(FRAMES{1}, 'MinQuality', 0.1, 'ROI', positionOfBody);
+        newPointsPrime=Prime.Location;
+        trackerPrime = vision.PointTracker;
+        trackerPrime.initialize(newPointsPrime, FRAMES{i}); 
+    elseif (rem(i, 50) == 0)
+        tracker = trackerPrime;
+        oldpoints=newPointsPrime;
+    end
+    
     [np, v] = tracker.step(FRAMES{i});
     
     structure.Markers{i}=np;
@@ -54,6 +54,8 @@ for i = 1: countOfFrames % tutaj zmieniï¿½am 1:countOfFrames
         roznica=zeros(size(roznicaX,1),2)
         %         error('... error ...');
     end
+    
+    
     
     roznicaX = roznica(:, 1); %x-y
     [~, I] = sort(abs(roznicaX), 'descend');
@@ -68,11 +70,7 @@ for i = 1: countOfFrames % tutaj zmieniï¿½am 1:countOfFrames
     %     f = insertShape(f, 'Line', nn);
     fWm=structure.FrameWithMarker{i};
     structure.FrameWithMarker{i}= insertShape(fWm, 'Line', nn);
-    %
-    
-    %
-    %    imshow(f)
-    %    hold on
+  
     fWm=structure.FrameWithMarker{i};
     f2 = insertMarker(fWm, [oldpoints(:,1),oldpoints(:,2)], 'o');
     structure.FrameWithMarker{i}=f2;
@@ -100,6 +98,9 @@ for i = 1: countOfFrames % tutaj zmieniï¿½am 1:countOfFrames
     structure.IsFace=IsFaceFilter;
     
 end
+
+structure.SumDec=Fun_DecGradMean(SUMAfilter);
+
 
 % movmean -> filter([1 1 1 1 ], 1, ...) -> na SUMIE
 %
